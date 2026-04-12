@@ -43,7 +43,7 @@ jobs:
 
       - name: Upload base envs to remote host
         run: |
-          scp ./bot/.env.example $REMOTE_USER@$REMOTE_HOST:~/uptime/.env
+          scp ./.env.example $REMOTE_USER@$REMOTE_HOST:~/uptime/.env
         env:
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
           REMOTE_USER: ${{ secrets.NEXUS_REMOTE_USER }}
