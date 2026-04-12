@@ -1,0 +1,29 @@
+services:
+  uptime-kuma:
+    image: louislam/uptime-kuma:2.2.1-slim-rootless
+    container_name: uptime
+    restart: always
+    ports:
+      - "127.0.0.1:3000:3001"
+    volumes:
+      - ./data:/app/data
+    environment:
+      - TZ=Europe/Moscow
+      - UMASK=0022
+    env_file: .env
+    networks:
+      - kuma_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      retries: 3
+      start_period: 10s
+      timeout: 5s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  kuma_network:
