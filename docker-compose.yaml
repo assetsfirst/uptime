@@ -1,6 +1,6 @@
 services:
   uptime-kuma:
-    image: louislam/uptime-kuma:2.2.1-slim-rootless
+    image: louislam/uptime-kuma:2.2.1
     container_name: uptime
     restart: always
     ports:
@@ -14,7 +14,7 @@ services:
     networks:
       - kuma_network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      test: ["CMD", "curl", "-f", "http://localhost:3001"]
       interval: 30s
       retries: 3
       start_period: 10s
