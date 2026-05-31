@@ -24,6 +24,36 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
-
+  xray-checker:
+    image: kutovoys/xray-checker
+    env_file: .env
+    environment:
+      - SUBSCRIPTION_UPDATE=true
+      - SUBSCRIPTION_UPDATE_INTERVAL=300
+      - PROXY_CHECK_INTERVAL=300
+      - PROXY_CHECK_METHOD=ip
+      - PROXY_TIMEOUT=30
+      - PROXY_IP_CHECK_URL=https://api.ipify.org?format=text
+      - PROXY_STATUS_CHECK_URL=http://cp.cloudflare.com/generate_204
+      - PROXY_DOWNLOAD_URL=https://proof.ovh.net/files/1Mb.dat
+      - PROXY_DOWNLOAD_TIMEOUT=60
+      - PROXY_DOWNLOAD_MIN_SIZE=51200
+      - PROXY_RESOLVE_DOMAINS=false
+      - SIMULATE_LATENCY=true
+      - XRAY_START_PORT=10000
+      - XRAY_LOG_LEVEL=none
+      - WEB_SHOW_DETAILS=false
+      - WEB_PUBLIC=false
+      - LOG_LEVEL=info
+      - RUN_ONCE=false
+    ports:
+      - "127.0.0.1:2112:2112"
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:2112/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 networks:
   kuma_network:

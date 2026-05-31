@@ -47,7 +47,14 @@ jobs:
         env:
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
           REMOTE_USER: ${{ secrets.NEXUS_REMOTE_USER }}
-
+      - name: Ensure .env file exists with correct content
+        run: |
+          ssh $REMOTE_USER@$REMOTE_HOST '
+            echo "SUBSCRIPTION_URL=${{ secrets.SUBSCRIPTION_URL }}" >> ~/uptime/.env
+          '
+        env:
+          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+          REMOTE_USER: ${{ secrets.NEXUS_REMOTE_USER }}
       - name: Deploy and clean up Docker
         run: |
           ssh $REMOTE_USER@$REMOTE_HOST '
