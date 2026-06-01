@@ -26,7 +26,10 @@ services:
         max-file: "3"
   xray-checker:
     image: kutovoys/xray-checker
+    container_name: checker
     env_file: .env
+    networks:
+      - kuma_network
     environment:
       - SUBSCRIPTION_UPDATE=true
       - SUBSCRIPTION_UPDATE_INTERVAL=300
@@ -47,7 +50,7 @@ services:
       - LOG_LEVEL=info
       - RUN_ONCE=false
     ports:
-      - "127.0.0.1:2112:2112"
+      - "2112:2112"
     restart: unless-stopped
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:2112/health" ]
