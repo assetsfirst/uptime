@@ -16,6 +16,7 @@ services:
       - NTFY_AUTH_DEFAULT_ACCESS=deny-all
       - NTFY_AUTH_USERS=nexus:$$2a$$12$$paUdYx29gikrfGpjIT.ZieWWDD6d76eOIQ7wUsCj9rozs2asMPmGK:admin
       - NTFY_ENABLE_LOGIN=true
+      - NTFY_REQUIRE_LOGIN=true
     volumes:
       - ntfy-data:/var/lib/ntfy
       - ntfy-cache:/var/cache/ntfy
