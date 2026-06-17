@@ -1,43 +1,40 @@
 services:
-  uptime-kuma:
-    image: louislam/uptime-kuma:2.4.0
-    container_name: uptime
-    restart: always
-    ports:
-      - "127.0.0.1:3000:3001"
-    volumes:
-      - ./data:/app/data
+  ntfy:
+    image: binwiederhier/ntfy:latest
+    container_name: ntfy
+    restart: unless-stopped
+    networks:
+      - ntfy_network
+    command: serve
     environment:
       - TZ=Europe/Moscow
-      - UMASK=0022
-    env_file: .env
-    networks:
-      - kuma_network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3001"]
-      interval: 30s
-      retries: 3
-      start_period: 10s
-      timeout: 5s
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
+      - NTFY_BASE_URL=https://${DOMAIN}
+      - NTFY_BEHIND_PROXY=true
+      - NTFY_CACHE_FILE=/var/cache/ntfy/cache.db
+      - NTFY_AUTH_FILE=/var/lib/ntfy/user.db
+      - NTFY_ATTACHMENT_CACHE_DIR=/var/cache/ntfy/attachments
+      - NTFY_AUTH_DEFAULT_ACCESS=deny-all
+      - NTFY_AUTH_USERS=nexus:$$2a$$12$$paUdYx29gikrfGpjIT.ZieWWDD6d76eOIQ7wUsCj9rozs2asMPmGK:admin
+      - NTFY_ENABLE_LOGIN=true
+    volumes:
+      - ntfy-data:/var/lib/ntfy
+      - ntfy-cache:/var/cache/ntfy
+    ports:
+      - "127.0.0.1:3000:80"
   xray-checker:
     image: kutovoys/xray-checker
     container_name: checker
     env_file: .env
     networks:
-      - kuma_network
+      - ntfy_network
     environment:
       - SUBSCRIPTION_UPDATE=true
       - SUBSCRIPTION_UPDATE_INTERVAL=300
-      - PROXY_CHECK_INTERVAL=300
-      - PROXY_CHECK_METHOD=download
+      - PROXY_CHECK_INTERVAL=450
+      - PROXY_CHECK_METHOD=status
       - PROXY_TIMEOUT=30
       - PROXY_IP_CHECK_URL=https://api.ipify.org?format=text
-      - PROXY_STATUS_CHECK_URL=http://cp.cloudflare.com/generate_204
+      - PROXY_STATUS_CHECK_URL=http://youtube.com/generate_204
       - PROXY_DOWNLOAD_URL=https://proof.ovh.net/files/1Mb.dat
       - PROXY_DOWNLOAD_TIMEOUT=60
       - PROXY_DOWNLOAD_MIN_SIZE=51200
@@ -58,5 +55,8 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
+volumes:
+  ntfy-data:
+  ntfy-cache:
 networks:
-  kuma_network:
+  ntfy_network:

@@ -1,0 +1,70 @@
+name: Deploy Kuma
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'docker-compose.kuma.yaml'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up SSH key
+        uses: webfactory/ssh-agent@v0.10.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Add remote host to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H "$REMOTE_HOST" >> ~/.ssh/known_hosts
+        env:
+          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+
+      - name: Create uptime folder if not exists
+        run: |
+          ssh $REMOTE_USER@$REMOTE_HOST '
+            mkdir -p ~/uptime
+          '
+        env:
+          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+          REMOTE_USER: ${{ secrets.NEXUS_REMOTE_USER }}
+
+      - name: Upload docker-compose.yaml to remote host
+        run: |
+          scp ./docker-compose.kuma.yaml $REMOTE_USER@$REMOTE_HOST:~/uptime/docker-compose.yaml
+        env:
+          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+          REMOTE_USER: ${{ secrets.NEXUS_REMOTE_USER }}
+
+      - name: Upload base envs to remote host
+        run: |
+          scp ./.env.example $REMOTE_USER@$REMOTE_HOST:~/uptime/.env
+        env:
+          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+          REMOTE_USER: ${{ secrets.NEXUS_REMOTE_USER }}
+      - name: Ensure .env file exists with correct content
+        run: |
+          ssh $REMOTE_USER@$REMOTE_HOST '
+            echo "SUBSCRIPTION_URL=${{ secrets.SUBSCRIPTION_URL }}" >> ~/uptime/.env
+          '
+        env:
+          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+          REMOTE_USER: ${{ secrets.NEXUS_REMOTE_USER }}
+      - name: Deploy and clean up Docker
+        run: |
+          ssh $REMOTE_USER@$REMOTE_HOST '
+            cd ~/uptime && \
+            docker compose pull && \
+            docker compose up -d --build && \
+            docker image prune -af
+          '
+        env:
+          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+          REMOTE_USER: ${{ secrets.NEXUS_REMOTE_USER }}

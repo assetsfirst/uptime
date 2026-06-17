@@ -1,11 +1,12 @@
-name: Deploy
+name: Deploy Ntfy
 
 on:
   workflow_dispatch:
   push:
     branches:
       - main
-
+    paths:
+      - 'docker-compose.ntfy.yaml'
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -23,7 +24,7 @@ jobs:
           mkdir -p ~/.ssh
           ssh-keyscan -H "$REMOTE_HOST" >> ~/.ssh/known_hosts
         env:
-          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+          REMOTE_HOST: ${{ secrets.NTFY_REMOTE_HOST }}
 
       - name: Create uptime folder if not exists
         run: |
@@ -31,29 +32,30 @@ jobs:
             mkdir -p ~/uptime
           '
         env:
-          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+          REMOTE_HOST: ${{ secrets.NTFY_REMOTE_HOST }}
           REMOTE_USER: ${{ secrets.NEXUS_REMOTE_USER }}
 
       - name: Upload docker-compose.yaml to remote host
         run: |
-          scp ./docker-compose.yaml $REMOTE_USER@$REMOTE_HOST:~/uptime/docker-compose.yaml
+          scp ./docker-compose.ntfy.yaml $REMOTE_USER@$REMOTE_HOST:~/uptime/docker-compose.yaml
         env:
-          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+          REMOTE_HOST: ${{ secrets.NTFY_REMOTE_HOST }}
           REMOTE_USER: ${{ secrets.NEXUS_REMOTE_USER }}
 
       - name: Upload base envs to remote host
         run: |
           scp ./.env.example $REMOTE_USER@$REMOTE_HOST:~/uptime/.env
         env:
-          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+          REMOTE_HOST: ${{ secrets.NTFY_REMOTE_HOST }}
           REMOTE_USER: ${{ secrets.NEXUS_REMOTE_USER }}
       - name: Ensure .env file exists with correct content
         run: |
           ssh $REMOTE_USER@$REMOTE_HOST '
             echo "SUBSCRIPTION_URL=${{ secrets.SUBSCRIPTION_URL }}" >> ~/uptime/.env
+            echo "DOMAIN=${{ secrets.NTFY_DOMAIN }}" >> ~/uptime/.env
           '
         env:
-          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+          REMOTE_HOST: ${{ secrets.NTFY_REMOTE_HOST }}
           REMOTE_USER: ${{ secrets.NEXUS_REMOTE_USER }}
       - name: Deploy and clean up Docker
         run: |
@@ -64,5 +66,5 @@ jobs:
             docker image prune -af
           '
         env:
-          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+          REMOTE_HOST: ${{ secrets.NTFY_REMOTE_HOST }}
           REMOTE_USER: ${{ secrets.NEXUS_REMOTE_USER }}
