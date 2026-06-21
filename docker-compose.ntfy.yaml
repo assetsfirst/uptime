@@ -17,7 +17,7 @@ services:
       - NTFY_AUTH_USERS=nexus:$$2a$$12$$paUdYx29gikrfGpjIT.ZieWWDD6d76eOIQ7wUsCj9rozs2asMPmGK:admin
       - NTFY_ENABLE_LOGIN=true
       - NTFY_REQUIRE_LOGIN=true
-      - NTFY_UPSTREAM_BASE_URL="https://ntfy.sh"
+      - NTFY_UPSTREAM_BASE_URL=https://ntfy.sh
     volumes:
       - ntfy-data:/var/lib/ntfy
       - ntfy-cache:/var/cache/ntfy
