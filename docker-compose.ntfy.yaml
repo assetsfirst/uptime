@@ -1,6 +1,6 @@
 services:
   ntfy:
-    image: binwiederhier/ntfy:latest
+    image: binwiederhier/ntfy:v2.25
     container_name: ntfy
     restart: unless-stopped
     networks:
@@ -24,7 +24,7 @@ services:
     ports:
       - "127.0.0.1:3000:80"
   xray-checker:
-    image: kutovoys/xray-checker
+    image: kutovoys/xray-checker:v1.3.0
     container_name: checker
     env_file: .env
     networks:
