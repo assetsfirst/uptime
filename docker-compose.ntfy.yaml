@@ -24,7 +24,7 @@ services:
     ports:
       - "127.0.0.1:3000:80"
   xray-checker:
-    image: kutovoys/xray-checker:v1.3.0
+    image: kutovoys/xray-checker:v1.3.1
     container_name: checker
     env_file: .env
     networks:
